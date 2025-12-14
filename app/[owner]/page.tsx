@@ -1,20 +1,25 @@
 "use client";
 
+import { ChangeEvent, useEffect, useRef, useState } from "react";
 import axios from "axios";
-import React, { ChangeEvent, useEffect, useRef, useState } from "react";
 
-const NotePage = ({ params }: { params: { owner: string } }) => {
+interface Props {
+  params: {
+    owner: string;
+  };
+}
+
+export default function NotePage({ params }: Props) {
   const [content, setContent] = useState("");
   const [author, setAuthor] = useState("");
-  const typingout = useRef(null);
+  const typingout = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const fetchNote = async () => {
       const res = await axios.get(`/api/note/${params.owner}`);
-      const data = await res.data;
-
-      setAuthor(data["owner"]);
-      setContent(data["content"]);
+      const data = res.data;
+      setAuthor(data.owner);
+      setContent(data.content);
     };
 
     fetchNote();
@@ -30,8 +35,8 @@ const NotePage = ({ params }: { params: { owner: string } }) => {
           note: newContent,
         }
       );
-    } catch (e: unknown) {
-      console.error("Error:", e);
+    } catch (e) {
+      console.error("Error updating note:", e);
     }
   };
 
@@ -53,13 +58,9 @@ const NotePage = ({ params }: { params: { owner: string } }) => {
       <h1 className="my-2 text-3xl font-bold">{author}</h1>
       <textarea
         className="w-full bg-slate-200 px-2 py-1 min-h-screen outline-none"
-        name="content"
-        id="content"
         value={content}
         onChange={handleChange}
-      ></textarea>
+      />
     </div>
   );
-};
-
-export default NotePage;
+}
